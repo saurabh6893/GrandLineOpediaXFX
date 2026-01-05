@@ -26,7 +26,7 @@ const registerUser = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      message: `Internal Server Eror`,
+      message: `Internal Server Error`,
       error: error.message,
     });
   }
@@ -36,6 +36,13 @@ const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // Input validation
+    if (!email || !password) {
+      return res.status(400).json({
+        message: "Email and password are required",
+      });
+    }
+
     const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
       return res.status(400).json({
@@ -44,20 +51,24 @@ const loginUser = async (req, res) => {
     }
 
     const isMatch = await user.comparePassword(password);
-    if (!isMatch)
-      return res.status(400).json({ message: "Passwords dont match" });
+    if (!isMatch) {
+      return res.status(400).json({ 
+        message: "Passwords dont match" 
+      });
+    }
 
     res.status(200).json({
-      message: "Successfully loged in",
+      message: "Successfully logged in",
       user: {
         id: user._id,
         email: user.email,
-        password: user.password,
+        username: user.username,
       },
     });
   } catch (error) {
     res.status(500).json({
       message: "Internal Server Error",
+      error: error.message,
     });
   }
 };
