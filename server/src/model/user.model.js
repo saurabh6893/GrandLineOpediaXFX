@@ -31,10 +31,7 @@ const userSchema = new Schema(
   }
 );
 
-// FIX: Async middleware should NOT use 'next' callback
-// Instead, just return/throw and let mongoose handle it
 userSchema.pre("save", async function () {
-  // Only hash if password is modified
   if (!this.isModified("password")) {
     return; // Return early, don't modify password
   }
@@ -42,7 +39,6 @@ userSchema.pre("save", async function () {
   try {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
-    // No need to call next() - async middleware auto-continues
   } catch (error) {
     // Throw error and let mongoose handle it
     throw new Error(`Password hashing failed: ${error.message}`);
